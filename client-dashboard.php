@@ -78,7 +78,7 @@ $total_spent = $spent_result->fetch_assoc()['total'];
             <p><?php echo $total_quests; ?></p>
         </a>
 
-        <a href="quest-board.php" class="dashboard-card">
+        <a href="quest-active-client.php" class="dashboard-card">
             <h2>🟢 Active Quests</h2>
             <p><?php echo $active_quests; ?></p>
         </a>

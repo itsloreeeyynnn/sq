@@ -194,6 +194,7 @@
     ===================== */
     .dashboard, .messages-container, .form-container {
         margin: 4rem;
+        min-height: 60vh;
     }
 
     .dashboard-cards {
@@ -395,6 +396,25 @@
         padding: 11px;
     }
 
+    .drop-zone {
+        border: 2px dashed #555;
+        padding: 2rem;
+        text-align: center;
+        border-radius: 12px;
+        cursor: pointer;
+        margin-bottom: 1rem;
+        color: #aaa;
+        transition: 0.2s;
+    }
+
+    .drop-zone:hover {
+        border-color: #00ff88;
+        color: #fff;
+    }
+
+    .form-card {
+        width: 400px;
+    }
     /* =====================
     BADGES
     ===================== */

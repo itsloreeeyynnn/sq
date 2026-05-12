@@ -81,7 +81,7 @@ $total_earnings = $earnings_result->fetch_assoc()['total'];
 
     <div class="dashboard-cards">
 
-        <a href="quest-board.php" class="dashboard-card">
+        <a href="quest-active.php" class="dashboard-card">
             <h2>🎯 Active Quests</h2>
             <p><?php echo $active_quests; ?></p>
         </a>
