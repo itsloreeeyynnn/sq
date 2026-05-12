@@ -73,39 +73,62 @@ $count = $result->num_rows;
         <h1>Quest Board ⚔️</h1>
     </div>
 
+    <?php if (isset($_GET['error']) && $_GET['error'] === 'already_applied'): ?>
+
+        <div class="error-message" style="margin-bottom:1rem;">
+            ⚠️ You already applied to this quest.
+        </div>
+
+    <?php endif; ?>
+
     <!-- Search & Filter Bar -->
-    <form method="GET" action="quest-board.php" class="filter-bar">
+    <div class="filter-wrapper">
+        <div class="filter-search">
+        <form method="GET" action="quest-board.php" style="margin-bottom:1rem; width: 100%;">
 
-        <input type="text" name="search" placeholder="🔍 Search quests..."
-            value="<?php echo htmlspecialchars($search); ?>" class="filter-input">
+            <input type="text" name="search" placeholder="🔍 Search quests..."
+                value="<?php echo htmlspecialchars($search); ?>" class="filter-input search">
 
-        <select name="difficulty" class="filter-select">
-            <option value="">All Difficulties</option>
-            <option value="easy" <?php echo $difficulty === 'easy' ? 'selected' : ''; ?>>⚡ Easy</option>
-            <option value="medium" <?php echo $difficulty === 'medium' ? 'selected' : ''; ?>>🔥 Medium</option>
-            <option value="hard" <?php echo $difficulty === 'hard' ? 'selected' : ''; ?>>💀 Hard</option>
-            <option value="risky" <?php echo $difficulty === 'risky' ? 'selected' : ''; ?>>☠️ Risky</option>
-        </select>
+        </form>
+        
+        <button type="button" class="filter-btn filter-toggle" onclick="toggleFilters()">
+                Filters
+        </button>
+        </div>
 
-        <select name="quest_type" class="filter-select">
-            <option value="">All Types</option>
-            <option value="solo" <?php echo $quest_type === 'solo' ? 'selected' : ''; ?>>⚔️ Solo</option>
-            <option value="party" <?php echo $quest_type === 'party' ? 'selected' : ''; ?>>👥 Party</option>
-        </select>
+        <form method="GET" action="quest-board.php" class="filter-bar" id="filterBar">
 
-        <input type="number" name="min_reward" placeholder="Min ₱" value="<?php echo $min_reward; ?>"
-            class="filter-input filter-small">
+            <input type="hidden" name="search" value="<?php echo htmlspecialchars($search); ?>">
 
-        <input type="number" name="max_reward" placeholder="Max ₱" value="<?php echo $max_reward; ?>"
-            class="filter-input filter-small">
+            <select name="difficulty" class="filter-select">
+                <option value="">All Difficulties</option>
+                <option value="easy" <?php echo $difficulty === 'easy' ? 'selected' : ''; ?>>⚡ Easy</option>
+                <option value="medium" <?php echo $difficulty === 'medium' ? 'selected' : ''; ?>>🔥 Medium</option>
+                <option value="hard" <?php echo $difficulty === 'hard' ? 'selected' : ''; ?>>💀 Hard</option>
+                <option value="risky" <?php echo $difficulty === 'risky' ? 'selected' : ''; ?>>☠️ Risky</option>
+            </select>
 
-        <button type="submit" class="btn">Search</button>
+            <select name="quest_type" class="filter-select">
+                <option value="">All Types</option>
+                <option value="solo" <?php echo $quest_type === 'solo' ? 'selected' : ''; ?>>⚔️ Solo</option>
+                <option value="party" <?php echo $quest_type === 'party' ? 'selected' : ''; ?>>👥 Party</option>
+            </select>
 
-        <?php if ($search || $difficulty || $min_reward !== '' || $max_reward !== '' || $quest_type): ?>
-            <a href="quest-board.php" class="btn-clear">✕ Clear</a>
-        <?php endif; ?>
+            <input type="number" name="min_reward" placeholder="Min ₱" value="<?php echo $min_reward; ?>"
+                class="filter-input filter-small">
 
-    </form>
+            <input type="number" name="max_reward" placeholder="Max ₱" value="<?php echo $max_reward; ?>"
+                class="filter-input filter-small">
+
+            <button type="submit" class="btn">Apply Filters</button>
+
+            <?php if ($difficulty || $min_reward !== '' || $max_reward !== '' || $quest_type): ?>
+                <a href="quest-board.php" class="btn-clear">✕ Clear</a>
+            <?php endif; ?>
+
+        </form>
+
+    </div>
 
     <!-- Results count -->
     <div style="text-align:center; color:#aaa; margin-bottom:1rem;">
@@ -114,14 +137,23 @@ $count = $result->num_rows;
 
     <div class="pagination" style="text-align:center; color:#aaa; margin-bottom:1rem;">
 
+        <?php
+        $params = $_GET;
+        unset($params['page']);
+        ?>
+
         <?php if ($page > 1): ?>
-            <a href="?page=<?php echo $page - 1; ?>&<?php echo http_build_query($_GET); ?>">⬅ Prev</a>
+            <a href="?page=<?php echo $page - 1; ?>&<?php echo http_build_query($params); ?>">
+                ⬅ Prev
+            </a>
         <?php endif; ?>
 
         <span>Page <?php echo $page; ?> of <?php echo $total_pages; ?></span>
 
         <?php if ($page < $total_pages): ?>
-            <a href="?page=<?php echo $page + 1; ?>&<?php echo http_build_query($_GET); ?>">Next ➡</a>
+            <a href="?page=<?php echo $page + 1; ?>&<?php echo http_build_query($params); ?>">
+                Next ➡
+            </a>
         <?php endif; ?>
 
     </div>
@@ -206,7 +238,17 @@ $count = $result->num_rows;
     </div>
 
     <?php include 'includes/footer.php'; ?>
+    <script>
+        function toggleFilters() {
+            const filterBar = document.getElementById('filterBar');
 
+            if (filterBar.style.display === 'none' || filterBar.style.display === '') {
+                filterBar.style.display = 'flex';
+            } else {
+                filterBar.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 
 </html>

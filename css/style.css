@@ -565,6 +565,11 @@
     font-size: 12px;
 }
 
+#filterBar{
+    display:none;
+    margin-top:1rem;
+}
+
 .open { background: #ff9800; }
 .completed { background: #4caf50; }
 
@@ -610,6 +615,23 @@
         margin-right: auto;
     }
 
+    .filter-search {
+        display: flex;
+        width: 100%;
+        gap: 10px;
+        justify-content: center;
+        padding: 1rem 60px;
+        margin-bottom: 1.5rem;
+        max-width: 1400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .search {
+        flex: 1;
+        height: 50px;
+    }
+
     .filter-input {
         padding: 10px 16px;
         border-radius: 10px;
@@ -644,6 +666,23 @@
     .filter-select:focus {
         outline: none;
         border-color: var(--gold-dim);
+    }
+
+    .filter-btn {
+        width: 150px;
+        height: 50px;
+        padding: 13px 20px;
+        border: 1px solid rgba(212,160,23,0.4);
+        border-radius: 10px;
+        background: rgba(212,160,23,0.08);
+        color: var(--gold);
+        font-family: 'Cinzel', serif;
+        font-weight: 600;
+        font-size: 0.82rem;
+        letter-spacing: 1.5px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        text-transform: uppercase;
     }
 
     .btn-clear {

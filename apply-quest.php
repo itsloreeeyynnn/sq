@@ -4,48 +4,99 @@ include 'includes/db.php';
 
 $user_id = $_SESSION['user_id'];
 
-$user = $conn->query("SELECT role FROM users WHERE user_id = $user_id")->fetch_assoc();
+/* ---------------------------
+   CHECK ROLE
+---------------------------- */
+$user = $conn->query("
+    SELECT role
+    FROM users
+    WHERE user_id = $user_id
+")->fetch_assoc();
 
 if ($user['role'] !== 'student') {
-    die("Only students can apply for quests.");
+
+    header("Location: quest-board.php?error=students_only");
+    exit();
 }
 
+/* ---------------------------
+   GET QUEST ID
+---------------------------- */
+$quest_id = isset($_POST['quest_id'])
+    ? (int)$_POST['quest_id']
+    : 0;
 
-$quest_id = isset($_POST['quest_id']) ? (int)$_POST['quest_id'] : 0;
+if ($quest_id <= 0) {
 
+    header("Location: quest-board.php?error=invalid_quest");
+    exit();
+}
+
+/* ---------------------------
+   CHECK QUEST
+---------------------------- */
 $quest_result = $conn->query("
-    SELECT * FROM quests
-    WHERE quest_id = $quest_id AND status = 'open'
+    SELECT *
+    FROM quests
+    WHERE quest_id = $quest_id
+    AND status = 'open'
 ");
 
 if ($quest_result->num_rows === 0) {
-    die("Quest not available.");
+
+    header("Location: quest-board.php?error=quest_unavailable");
+    exit();
 }
 
+/* ---------------------------
+   PREVENT DUPLICATE APPLICATION
+---------------------------- */
 $check = $conn->query("
-    SELECT * FROM applications
-    WHERE quest_id = $quest_id AND student_id = $user_id
+    SELECT application_id
+    FROM applications
+    WHERE quest_id = $quest_id
+    AND student_id = $user_id
 ");
 
 if ($check->num_rows > 0) {
-    die("You already applied to this quest.");
+
+    header("Location: quest-board.php?error=already_applied");
+    exit();
 }
 
+/* ---------------------------
+   INSERT APPLICATION
+---------------------------- */
 $conn->query("
-    INSERT INTO applications (quest_id, student_id, status)
-    VALUES ($quest_id, $user_id, 'pending')
+    INSERT INTO applications
+    (quest_id, student_id, status)
+    VALUES
+    ($quest_id, $user_id, 'pending')
 ");
 
+/* ---------------------------
+   SEND NOTIFICATION
+---------------------------- */
 $quest = $quest_result->fetch_assoc();
+
 $client_id = $quest['client_id'];
 
 $message = "A student applied to your quest: " . $quest['title'];
 
-$conn->query("
-    INSERT INTO notifications (user_id, message, link)
-    VALUES ($client_id, '$message', 'quest-applicants.php?id=$quest_id')
+$stmt = $conn->prepare("
+    INSERT INTO notifications
+    (user_id, message, link)
+    VALUES (?, ?, ?)
 ");
 
+$link = "quest-applicants.php?id=$quest_id";
+
+$stmt->bind_param("iss", $client_id, $message, $link);
+$stmt->execute();
+
+/* ---------------------------
+   SUCCESS REDIRECT
+---------------------------- */
 header("Location: quest-board.php?applied=success");
 exit();
 ?>

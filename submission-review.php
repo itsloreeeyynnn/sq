@@ -27,17 +27,18 @@ if (!$quest) {
 }
 
 /* ---------------------------
-   HANDLE ACTIONS (APPROVE / REJECT)
+   HANDLE ACTIONS
 ---------------------------- */
 if (isset($_GET['action']) && isset($_GET['submission_id'])) {
 
     $action = $_GET['action'];
     $submission_id = (int)$_GET['submission_id'];
 
-    // get submission safely
+    // Get submission
     $submission = $conn->query("
-        SELECT * FROM submissions 
-        WHERE submission_id = $submission_id 
+        SELECT *
+        FROM submissions
+        WHERE submission_id = $submission_id
         AND quest_id = $quest_id
     ")->fetch_assoc();
 
@@ -45,84 +46,100 @@ if (isset($_GET['action']) && isset($_GET['submission_id'])) {
 
         $student_id = $submission['student_id'];
 
+        // Prevent duplicate approval/rejection
+        $remarks = strtolower($submission['remarks'] ?? '');
+
+        $already_approved = strpos($remarks, 'approved') !== false;
+        $already_rejected = strpos($remarks, 'rejected') !== false;
+
         /* ---------------------------
            APPROVE
         ---------------------------- */
-        if ($action === 'approve') {
+        if ($action === 'approve' && !$already_approved && !$already_rejected) {
 
-            // mark submission
+            // Update submission remarks
             $conn->query("
-                UPDATE submissions 
-                SET remarks = CONCAT(IFNULL(remarks,''), ' | APPROVED')
+                UPDATE submissions
+                SET remarks = 'APPROVED'
                 WHERE submission_id = $submission_id
             ");
 
-            // complete quest
+            // Complete quest
             $conn->query("
-                UPDATE quests 
+                UPDATE quests
                 SET status = 'completed'
                 WHERE quest_id = $quest_id
             ");
 
-            // get reward + user stats
+            // Get reward + student stats
             $data = $conn->query("
                 SELECT q.reward, u.xp, u.level
-                FROM quests q, users u
+                FROM quests q
+                JOIN users u ON u.user_id = $student_id
                 WHERE q.quest_id = $quest_id
-                AND u.user_id = $student_id
             ")->fetch_assoc();
 
             $reward = (float)$data['reward'];
             $xp = (int)$data['xp'];
             $level = (int)$data['level'];
 
-            // XP system
+            // XP reward
             $xp_gain = 50;
+
             $new_xp = $xp + $xp_gain;
             $new_level = $level;
 
+            // Level up system
             while ($new_xp >= ($new_level * 100)) {
                 $new_xp -= ($new_level * 100);
                 $new_level++;
             }
 
-            // update user
+            // Update student
             $conn->query("
-                UPDATE users 
+                UPDATE users
                 SET xp = $new_xp,
-                    level = $new_level,
-                    balance = COALESCE(balance,0) + $reward
+                    level = $new_level
                 WHERE user_id = $student_id
             ");
 
-            // notify student
-            $conn->query("
-                INSERT INTO notifications (user_id, message)
-                VALUES (
-                    $student_id,
-                    'Your submission was approved! +50 XP and ₱$reward earned 🎉'
-                )
+            // Notification
+            $message = "Your submission for '{$quest['title']}' was approved! +{$xp_gain} XP and ₱" . number_format($reward, 2) . " earned 🎉";
+
+            $stmt = $conn->prepare("
+                INSERT INTO notifications (user_id, message, link)
+                VALUES (?, ?, ?)
             ");
+
+            $link = "quest-active.php";
+
+            $stmt->bind_param("iss", $student_id, $message, $link);
+            $stmt->execute();
         }
 
         /* ---------------------------
            REJECT
         ---------------------------- */
-        if ($action === 'reject') {
+        if ($action === 'reject' && !$already_approved && !$already_rejected) {
 
             $conn->query("
-                UPDATE submissions 
-                SET remarks = CONCAT(IFNULL(remarks,''), ' | NEEDS REVISION')
+                UPDATE submissions
+                SET remarks = 'REJECTED'
                 WHERE submission_id = $submission_id
             ");
 
-            $conn->query("
-                INSERT INTO notifications (user_id, message)
-                VALUES (
-                    $student_id,
-                    'Your submission needs revision.'
-                )
+            // Notify student
+            $message = "Your submission for '{$quest['title']}' was rejected. Please revise and submit again.";
+
+            $stmt = $conn->prepare("
+                INSERT INTO notifications (user_id, message, link)
+                VALUES (?, ?, ?)
             ");
+
+            $link = "quest-active.php";
+
+            $stmt->bind_param("iss", $student_id, $message, $link);
+            $stmt->execute();
         }
     }
 
@@ -131,7 +148,7 @@ if (isset($_GET['action']) && isset($_GET['submission_id'])) {
 }
 
 /* ---------------------------
-   GET SUBMISSIONS (ONLY THIS QUEST)
+   GET SUBMISSIONS
 ---------------------------- */
 $submissions = $conn->query("
     SELECT s.*, u.full_name
@@ -156,6 +173,7 @@ $submissions = $conn->query("
 <div class="dashboard">
 
     <h1>📦 Submission Review</h1>
+
     <p style="color:#aaa;">
         <?php echo htmlspecialchars($quest['title']); ?>
     </p>
@@ -166,39 +184,80 @@ $submissions = $conn->query("
 
             <?php while ($s = $submissions->fetch_assoc()): ?>
 
+                <?php
+                $remarks = strtolower($s['remarks'] ?? '');
+                $is_approved = strpos($remarks, 'approved') !== false;
+                $is_rejected = strpos($remarks, 'rejected') !== false;
+                ?>
+
                 <div class="quest-card">
 
-                    <h2><?php echo htmlspecialchars($s['full_name']); ?></h2>
+                    <h2>
+                        <?php echo htmlspecialchars($s['full_name']); ?>
+                    </h2>
 
                     <p>
-                        📁 <a href="<?php echo $s['file_path']; ?>" target="_blank">
+                        📁
+                        <a href="<?php echo $s['file_path']; ?>" target="_blank">
                             Download Submission
                         </a>
                     </p>
 
                     <?php if (!empty($s['submission_link'])): ?>
                         <p>
-                            🔗 <a href="<?php echo $s['submission_link']; ?>" target="_blank">
+                            🔗
+                            <a href="<?php echo $s['submission_link']; ?>" target="_blank">
                                 External Link
                             </a>
                         </p>
                     <?php endif; ?>
 
                     <p style="color:#aaa;">
-                        <?php echo htmlspecialchars($s['remarks']); ?>
+                        <?php echo htmlspecialchars($s['remarks'] ?: 'No remarks'); ?>
                     </p>
 
-                    <small>Submitted: <?php echo $s['submitted_at']; ?></small>
+                    <small>
+                        Submitted:
+                        <?php echo date('M d, Y h:i A', strtotime($s['submitted_at'])); ?>
+                    </small>
 
-                    <div style="margin-top:1rem; display:flex; gap:10px;">
+                    <div style="margin-top:1rem;">
 
-                        <a href="?quest_id=<?php echo $quest_id; ?>&action=approve&submission_id=<?php echo $s['submission_id']; ?>" class="btn">
-                            ✅ Approve
-                        </a>
+                        <?php if ($is_approved): ?>
 
-                        <a href="?quest_id=<?php echo $quest_id; ?>&action=reject&submission_id=<?php echo $s['submission_id']; ?>" class="btn-clear">
-                            ❌ Reject
-                        </a>
+                            <div class="badge-party">
+                                ✅ APPROVED
+                            </div>
+
+                        <?php elseif ($is_rejected): ?>
+
+                            <div class="badge-solo">
+                                ❌ REJECTED
+                            </div>
+
+                        <?php else: ?>
+
+                            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+
+                                <a
+                                    href="?quest_id=<?php echo $quest_id; ?>&action=approve&submission_id=<?php echo $s['submission_id']; ?>"
+                                    class="btn"
+                                    onclick="return confirm('Approve this submission?');"
+                                >
+                                    ✅ Approve
+                                </a>
+
+                                <a
+                                    href="?quest_id=<?php echo $quest_id; ?>&action=reject&submission_id=<?php echo $s['submission_id']; ?>"
+                                    class="btn-clear"
+                                    onclick="return confirm('Reject this submission?');"
+                                >
+                                    ❌ Reject
+                                </a>
+
+                            </div>
+
+                        <?php endif; ?>
 
                     </div>
 

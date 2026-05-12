@@ -4,7 +4,6 @@ include 'includes/db.php';
 
 $user_id = $_SESSION['user_id'];
 
-// Get client info
 $user_result = $conn->query("SELECT full_name, level FROM users WHERE user_id = $user_id");
 $user = $user_result->fetch_assoc();
 

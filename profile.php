@@ -7,9 +7,6 @@ $profile_id = isset($_GET['id']) ? (int)$_GET['id'] : $viewer_id;
 
 $is_owner = ($viewer_id === $profile_id);
 
-/* -----------------------
-   UPDATE PROFILE (OWNER ONLY)
------------------------- */
 if ($is_owner && isset($_POST['update'])) {
 
     $full_name = mysqli_real_escape_string($conn, $_POST['full_name']);
@@ -44,16 +41,10 @@ if ($is_owner && isset($_POST['update'])) {
     $success = "Profile updated successfully!";
 }
 
-/* -----------------------
-   USER DATA
------------------------- */
 $user = $conn->query("
     SELECT * FROM users WHERE user_id = $profile_id
 ")->fetch_assoc();
 
-/* -----------------------
-   BADGES
------------------------- */
 $badges = $conn->query("
     SELECT b.badge_name, b.description, ub.earned_at
     FROM user_badges ub
@@ -62,9 +53,6 @@ $badges = $conn->query("
     ORDER BY ub.earned_at DESC
 ");
 
-/* -----------------------
-   TRAITS
------------------------- */
 $traits = $conn->query("
     SELECT rt.trait_name, rt.emoji
     FROM user_traits ut
@@ -72,9 +60,6 @@ $traits = $conn->query("
     WHERE ut.user_id = $profile_id
 ");
 
-/* -----------------------
-   STATS
------------------------- */
 $completed = $conn->query("
     SELECT COUNT(*) as total
     FROM submissions

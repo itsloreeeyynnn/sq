@@ -114,11 +114,12 @@ if ($chat_user) {
                     type="text" 
                     name="message_text" 
                     placeholder="Type message..." 
-                    required 
+                    required
+                    class="msg-field"
                     style="flex:1;"
                 >
 
-                <button class="btn" name="send">Send</button>
+                <button class="msg-btn" name="send">Send</button>
 
             </form>
 
