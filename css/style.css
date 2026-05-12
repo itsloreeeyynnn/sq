@@ -431,6 +431,143 @@
         height: 550px;
     }
 
+
+    
+.messages-layout{
+    display:flex;
+    height:60vh;
+    gap:20px;
+}
+
+/* LEFT SIDEBAR */
+.convo-list{
+    width:30%;
+    background:#1e1e1e;
+    padding:10px;
+    border-radius:10px;
+    overflow-y:auto;
+}
+
+.convo-item{
+    padding:10px;
+    margin-bottom:10px;
+    background:#2a2a2a;
+    border-radius:8px;
+    cursor:pointer;
+    text-decoration:none;
+    color:white;
+    display:block;
+}
+
+.convo-item:hover{
+    background:#3a3a3a;
+}
+
+.convo-item small{
+    color:#aaa;
+    display:block;
+    margin-top:5px;
+}
+
+/* RIGHT CHAT */
+.chat-box{
+    width:70%;
+    background:#1e1e1e;
+    padding:15px;
+    border-radius:10px;
+    display:flex;
+    flex-direction:column;
+}
+
+.chat-thread{
+    flex:1;
+    overflow-y:auto;
+    padding:10px;
+}
+
+.msg{
+    margin:10px 0;
+}
+
+.msg.me{
+    text-align:right;
+}
+
+.msg-btn {
+    width: 20%;
+    height: 48px;
+    padding:8px 12px;
+    border: 1px solid rgba(212,160,23,0.4);
+    border-radius: 10px;
+    background: rgba(212,160,23,0.08);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-transform: uppercase;
+}
+
+.msg p{
+    display:inline-block;
+    padding:8px 12px;
+    border-radius:10px;
+    background:#333;
+    max-width:70%;
+}
+
+.msg.me p{
+    background:rgba(212,160,23,0.4);
+}
+
+.msg-field {
+    height: 48px;
+    padding:8px 12px;
+    letter-spacing: 1.5px;
+}
+
+.chat-input{
+    display:flex;
+    gap:10px;
+    margin-top:10px;
+}
+
+
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.card {
+    background: #1e1e1e;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.table th, .table td {
+    padding: 10px;
+    border-bottom: 1px solid #333;
+    color: #ddd;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 12px;
+}
+
+.open { background: #ff9800; }
+.completed { background: #4caf50; }
+
     /* =====================
     BADGES
     ===================== */

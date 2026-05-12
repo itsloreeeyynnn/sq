@@ -4,38 +4,71 @@ include 'includes/db.php';
 
 $current_user = $_SESSION['user_id'];
 
-if(isset($_POST['send'])){
+/* ---------------------------
+   ACTIVE CHAT USER
+---------------------------- */
+$chat_user = isset($_GET['user']) ? (int)$_GET['user'] : 0;
 
-    $receiver_id = $_POST['receiver_id'];
-    $message_text = $_POST['message_text'];
+/* ---------------------------
+   SEND MESSAGE
+---------------------------- */
+if (isset($_POST['send']) && $chat_user) {
 
-    $query = "INSERT INTO messages
-    (sender_id, receiver_id, message_text)
-    VALUES
-    ('$current_user', '$receiver_id', '$message_text')";
+    $message = mysqli_real_escape_string($conn, $_POST['message_text']);
 
-    mysqli_query($conn, $query);
+    $conn->query("
+        INSERT INTO messages (sender_id, receiver_id, message_text)
+        VALUES ($current_user, $chat_user, '$message')
+    ");
+
+    header("Location: messages.php?user=$chat_user");
+    exit();
 }
 
-$query = "SELECT
-m.*,
-u.full_name AS sender_name
-FROM messages m
-INNER JOIN users u
-ON m.sender_id = u.user_id
-WHERE receiver_id = '$current_user'
-ORDER BY sent_at DESC";
+/* ---------------------------
+   CONVERSATION LIST
+---------------------------- */
+$conversations = $conn->query("
+    SELECT 
+        u.user_id,
+        u.full_name,
+        m.message_text,
+        m.sent_at
+    FROM users u
+    INNER JOIN messages m ON m.message_id = (
+        SELECT m2.message_id
+        FROM messages m2
+        WHERE 
+            (m2.sender_id = u.user_id AND m2.receiver_id = $current_user)
+            OR
+            (m2.sender_id = $current_user AND m2.receiver_id = u.user_id)
+        ORDER BY m2.sent_at DESC
+        LIMIT 1
+    )
+    WHERE u.user_id != $current_user
+    ORDER BY m.sent_at DESC
+");
 
-$result = mysqli_query($conn, $query);
+/* ---------------------------
+   CHAT USER INFO
+---------------------------- */
+$chat_user_info = null;
+
+if ($chat_user) {
+    $chat_user_info = $conn->query("
+        SELECT full_name FROM users WHERE user_id = $chat_user
+    ")->fetch_assoc();
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Messages</title>
 <link rel="stylesheet" href="css/style.css">
+
+
 </head>
 <body>
 
@@ -43,47 +76,105 @@ $result = mysqli_query($conn, $query);
 
 <div class="messages-container">
 
-    <div class="messages-box">
+<div class="messages-layout">
 
-        <h1>Guild Messages 💬</h1>
+    <!-- LEFT: CONVERSATIONS -->
+    <div class="convo-list">
 
-        <form method="POST">
+        <h3>💬 Conversations</h3>
 
-            <input type="number" name="receiver_id" placeholder="Receiver User ID" required>
+        <?php while($c = $conversations->fetch_assoc()): ?>
 
-            <textarea name="message_text" placeholder="Write your message..." required></textarea>
+            <a href="messages.php?user=<?php echo $c['user_id']; ?>" class="convo-item">
 
-            <button type="submit" name="send" class="btn">
-                Send Message
-            </button>
+                <strong><?php echo htmlspecialchars($c['full_name']); ?></strong>
 
-        </form>
+                <small>
+                    <?php echo htmlspecialchars(substr($c['message_text'], 0, 40)); ?>...
+                </small>
 
-        <div class="message-list">
+            </a>
 
-            <?php while($row = mysqli_fetch_assoc($result)){ ?>
+        <?php endwhile; ?>
 
-                <div class="message-card">
+    </div>
 
-                    <h3><?php echo $row['sender_name']; ?></h3>
+    <!-- RIGHT: CHAT -->
+    <div class="chat-box">
 
-                    <p>
-                        <?php echo $row['message_text']; ?>
-                    </p>
+        <?php if ($chat_user): ?>
 
-                    <small>
-                        <?php echo $row['sent_at']; ?>
-                    </small>
+            <h3>Chat with <?php echo htmlspecialchars($chat_user_info['full_name']); ?></h3>
 
-                </div>
+            <div class="chat-thread" id="chatThread"></div>
 
-            <?php } ?>
+            <form method="POST" class="chat-input">
 
-        </div>
+                <input 
+                    type="text" 
+                    name="message_text" 
+                    placeholder="Type message..." 
+                    required 
+                    style="flex:1;"
+                >
+
+                <button class="btn" name="send">Send</button>
+
+            </form>
+
+        <?php else: ?>
+
+            <p style="color:#aaa;">Select a conversation to start chatting</p>
+
+        <?php endif; ?>
 
     </div>
 
 </div>
+
+</div>
+
+<?php if ($chat_user): ?>
+<script>
+const chatUser = <?php echo $chat_user; ?>;
+const currentUser = <?php echo $current_user; ?>;
+
+function loadMessages() {
+    fetch("fetch-messages.php?user=" + chatUser)
+        .then(res => res.json())
+        .then(data => {
+
+            const chat = document.getElementById("chatThread");
+            chat.innerHTML = "";
+
+            data.forEach(msg => {
+
+                const div = document.createElement("div");
+                div.classList.add("msg");
+
+                if (msg.sender_id == currentUser) {
+                    div.classList.add("me");
+                }
+
+                div.innerHTML = `
+                    <p>${msg.message_text}</p>
+                    <div style="font-size:10px; color:#aaa;">
+                        ${msg.full_name} • ${msg.sent_at}
+                    </div>
+                `;
+
+                chat.appendChild(div);
+            });
+
+            chat.scrollTop = chat.scrollHeight;
+        });
+}
+
+loadMessages();
+
+setInterval(loadMessages, 2000);
+</script>
+<?php endif; ?>
 
 </body>
 </html>
