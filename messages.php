@@ -7,7 +7,7 @@ $current_user = $_SESSION['user_id'];
 /* ---------------------------
    ACTIVE CHAT USER
 ---------------------------- */
-$chat_user = isset($_GET['user']) ? (int)$_GET['user'] : 0;
+$chat_user = isset($_GET['user']) ? (int) $_GET['user'] : 0;
 
 /* ---------------------------
    SEND MESSAGE
@@ -25,9 +25,16 @@ if (isset($_POST['send']) && $chat_user) {
     exit();
 }
 
-/* ---------------------------
-   CONVERSATION LIST
----------------------------- */
+$search_user = isset($_GET['search_user'])
+    ? mysqli_real_escape_string($conn, $_GET['search_user'])
+    : '';
+
+$search_sql = '';
+
+if (!empty($search_user)) {
+    $search_sql = "AND u.full_name LIKE '%$search_user%'";
+}
+
 $conversations = $conn->query("
     SELECT 
         u.user_id,
@@ -39,13 +46,20 @@ $conversations = $conn->query("
         SELECT m2.message_id
         FROM messages m2
         WHERE 
-            (m2.sender_id = u.user_id AND m2.receiver_id = $current_user)
+            (
+                m2.sender_id = u.user_id 
+                AND m2.receiver_id = $current_user
+            )
             OR
-            (m2.sender_id = $current_user AND m2.receiver_id = u.user_id)
+            (
+                m2.sender_id = $current_user 
+                AND m2.receiver_id = u.user_id
+            )
         ORDER BY m2.sent_at DESC
         LIMIT 1
     )
     WHERE u.user_id != $current_user
+    $search_sql
     ORDER BY m.sent_at DESC
 ");
 
@@ -63,119 +77,135 @@ if ($chat_user) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>Messages</title>
-<link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <title>Messages</title>
+    <link rel="stylesheet" href="css/style.css">
 
 
 </head>
+
 <body>
 
-<?php include 'includes/navbar.php'; ?>
+    <?php include 'includes/navbar.php'; ?>
 
-<div class="messages-container">
+    <div class="messages-container">
 
-<div class="messages-layout">
+        <div class="messages-layout">
 
-    <!-- LEFT: CONVERSATIONS -->
-    <div class="convo-list">
+            <!-- LEFT: CONVERSATIONS -->
+            <div class="convo-list">
+                <div style="margin-bottom:1rem;">
 
-        <h3>💬 Conversations</h3>
+                    <a href="new-message.php" class="btn" style="width:100%; display:block; text-align:center;">
+                        ➕ New Message
+                    </a>
 
-        <?php while($c = $conversations->fetch_assoc()): ?>
+                </div>
+                <!-- SEARCH USER -->
+                <form method="GET" action="messages.php" style="margin-bottom:1rem;">
 
-            <a href="messages.php?user=<?php echo $c['user_id']; ?>" class="convo-item">
+                    <?php if ($chat_user): ?>
+                        <input type="hidden" name="user" value="<?php echo $chat_user; ?>">
+                    <?php endif; ?>
 
-                <strong><?php echo htmlspecialchars($c['full_name']); ?></strong>
+                    <input type="text" name="search_user" placeholder="🔍 Search users..."
+                        value="<?php echo isset($_GET['search_user']) ? htmlspecialchars($_GET['search_user']) : ''; ?>"
+                        class="filter-input" style="width:100%;">
 
-                <small>
-                    <?php echo htmlspecialchars(substr($c['message_text'], 0, 40)); ?>...
-                </small>
+                </form>
 
-            </a>
+                <h3>💬 Conversations</h3>
 
-        <?php endwhile; ?>
+                <?php while ($c = $conversations->fetch_assoc()): ?>
+
+                    <a href="messages.php?user=<?php echo $c['user_id']; ?>" class="convo-item">
+
+                        <strong><?php echo htmlspecialchars($c['full_name']); ?></strong>
+
+                        <small>
+                            <?php echo htmlspecialchars(substr($c['message_text'], 0, 40)); ?>...
+                        </small>
+
+                    </a>
+
+                <?php endwhile; ?>
+
+            </div>
+
+            <!-- RIGHT: CHAT -->
+            <div class="chat-box">
+
+                <?php if ($chat_user): ?>
+
+                    <h3>Chat with <?php echo htmlspecialchars($chat_user_info['full_name']); ?></h3>
+
+                    <div class="chat-thread" id="chatThread"></div>
+
+                    <form method="POST" class="chat-input">
+
+                        <input type="text" name="message_text" placeholder="Type message..." required class="msg-field"
+                            style="flex:1;">
+
+                        <button class="msg-btn" name="send">Send</button>
+
+                    </form>
+
+                <?php else: ?>
+
+                    <p style="color:#aaa;">Select a conversation to start chatting</p>
+
+                <?php endif; ?>
+
+            </div>
+
+        </div>
 
     </div>
 
-    <!-- RIGHT: CHAT -->
-    <div class="chat-box">
+    <?php if ($chat_user): ?>
+        <script>
+            const chatUser = <?php echo $chat_user; ?>;
+            const currentUser = <?php echo $current_user; ?>;
 
-        <?php if ($chat_user): ?>
+            function loadMessages() {
+                fetch("fetch-messages.php?user=" + chatUser)
+                    .then(res => res.json())
+                    .then(data => {
 
-            <h3>Chat with <?php echo htmlspecialchars($chat_user_info['full_name']); ?></h3>
+                        const chat = document.getElementById("chatThread");
+                        chat.innerHTML = "";
 
-            <div class="chat-thread" id="chatThread"></div>
+                        data.forEach(msg => {
 
-            <form method="POST" class="chat-input">
+                            const div = document.createElement("div");
+                            div.classList.add("msg");
 
-                <input 
-                    type="text" 
-                    name="message_text" 
-                    placeholder="Type message..." 
-                    required
-                    class="msg-field"
-                    style="flex:1;"
-                >
+                            if (msg.sender_id == currentUser) {
+                                div.classList.add("me");
+                            }
 
-                <button class="msg-btn" name="send">Send</button>
-
-            </form>
-
-        <?php else: ?>
-
-            <p style="color:#aaa;">Select a conversation to start chatting</p>
-
-        <?php endif; ?>
-
-    </div>
-
-</div>
-
-</div>
-
-<?php if ($chat_user): ?>
-<script>
-const chatUser = <?php echo $chat_user; ?>;
-const currentUser = <?php echo $current_user; ?>;
-
-function loadMessages() {
-    fetch("fetch-messages.php?user=" + chatUser)
-        .then(res => res.json())
-        .then(data => {
-
-            const chat = document.getElementById("chatThread");
-            chat.innerHTML = "";
-
-            data.forEach(msg => {
-
-                const div = document.createElement("div");
-                div.classList.add("msg");
-
-                if (msg.sender_id == currentUser) {
-                    div.classList.add("me");
-                }
-
-                div.innerHTML = `
+                            div.innerHTML = `
                     <p>${msg.message_text}</p>
                     <div style="font-size:10px; color:#aaa;">
                         ${msg.full_name} • ${msg.sent_at}
                     </div>
                 `;
 
-                chat.appendChild(div);
-            });
+                            chat.appendChild(div);
+                        });
 
-            chat.scrollTop = chat.scrollHeight;
-        });
-}
+                        chat.scrollTop = chat.scrollHeight;
+                    });
+            }
 
-loadMessages();
+            loadMessages();
 
-setInterval(loadMessages, 2000);
-</script>
-<?php endif; ?>
+            setInterval(loadMessages, 2000);
+        </script>
+    <?php endif; ?>
 
 </body>
+
 </html>

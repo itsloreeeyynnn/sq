@@ -246,7 +246,7 @@
     }
     
     .dashboard-card p {
-        font-size: 2rem;
+        font-size: 1rem;
         font-weight: 700;
         color: var(--gold);
         font-family: 'Cinzel', serif;
@@ -396,15 +396,6 @@
         padding: 11px;
     }
 
-    .quest-list {
-        flex: 2;
-        display: grid;
-        grid-template-columns: 100%;
-        gap: 20px;
-        max-width: 1400px;
-        margin: 0 auto;
-    }
-
     .drop-zone {
         border: 2px dashed #555;
         padding: 2rem;
@@ -427,8 +418,14 @@
     }
 
     .form-card {
-        flex: 1;
-        height: 550px;
+        width: 30%;
+        height: fit-content;
+    }
+
+    .quest-list {
+        width: 70%;
+        flex-direction: column;
+        gap: 20px;
     }
 
 

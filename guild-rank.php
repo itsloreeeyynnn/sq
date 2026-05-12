@@ -66,7 +66,7 @@ $current_xp = $user['xp'];
             <div class="dashboard-card">
                 <h2>🏅 <?php echo $badge['badge_name']; ?></h2>
                 <p><?php echo $badge['description']; ?></p>
-                <p style="color:#aaa; font-size:0.8rem;">Earned: <?php echo date('M d, Y', strtotime($badge['earned_at'])); ?></p>
+                <p style="color:#aaa; font-size:0.4rem;">Earned: <?php echo date('M d, Y', strtotime($badge['earned_at'])); ?></p>
             </div>
             <?php endwhile; ?>
         <?php else: ?>

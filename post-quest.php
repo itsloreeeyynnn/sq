@@ -4,49 +4,107 @@ include 'includes/db.php';
 
 $client_id = $_SESSION['user_id'];
 
+/* =========================
+   POST QUEST
+========================= */
 if (isset($_POST['post_quest'])) {
 
     $category_id = (int) $_POST['category_id'];
-    $title = mysqli_real_escape_string($conn, trim($_POST['title']));
-    $description = mysqli_real_escape_string($conn, trim($_POST['description']));
+
+    $title = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['title'])
+    );
+
+    $description = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['description'])
+    );
+
     $reward = (float) $_POST['reward'];
+
     $deadline = $_POST['deadline'];
-    $difficulty = mysqli_real_escape_string($conn, $_POST['difficulty']);
 
-    if ($reward < 1) {
-        $error = "Reward must be greater than 0.";
-    } else {
+    $difficulty = mysqli_real_escape_string(
+        $conn,
+        $_POST['difficulty']
+    );
 
-        $stmt = $conn->prepare("
-            INSERT INTO quests
-            (client_id, category_id, title, description, reward, deadline, difficulty)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ");
+    // SOLO OR PARTY
+    $is_party_quest = isset($_POST['is_party_quest'])
+        ? (int) $_POST['is_party_quest']
+        : 0;
 
-        $stmt->bind_param(
-            "iissdss",
-            $client_id,
-            $category_id,
-            $title,
-            $description,
-            $reward,
-            $deadline,
-            $difficulty
-        );
+    // PARTY SIZE
+    $max_party_members = null;
 
-        $stmt->execute();
+    if ($is_party_quest == 1) {
 
-        header("Location: post-quest.php?success=1");
-        exit();
+        $max_party_members = (int) $_POST['max_party_members'];
+
+        if ($max_party_members < 2) {
+            $error = "Party quests require at least 2 adventurers.";
+        }
+    }
+
+    if (!isset($error)) {
+
+        if ($reward < 1) {
+
+            $error = "Reward must be greater than 0.";
+
+        } else {
+
+            $stmt = $conn->prepare("
+                INSERT INTO quests
+                (
+                    client_id,
+                    category_id,
+                    title,
+                    description,
+                    reward,
+                    deadline,
+                    difficulty,
+                    is_party_quest,
+                    max_party_members
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+
+            $stmt->bind_param(
+                "iissdssii",
+                $client_id,
+                $category_id,
+                $title,
+                $description,
+                $reward,
+                $deadline,
+                $difficulty,
+                $is_party_quest,
+                $max_party_members
+            );
+
+            $stmt->execute();
+
+            header("Location: post-quest.php?success=1");
+            exit();
+        }
     }
 }
 
+/* =========================
+   SUCCESS MESSAGE
+========================= */
 if (isset($_GET['success'])) {
     $success = "Quest posted successfully!";
 }
 
+/* =========================
+   QUEST LIST
+========================= */
 $quests = $conn->query("
     SELECT q.*,
+
         (
             SELECT COUNT(*)
             FROM applications a
@@ -60,10 +118,15 @@ $quests = $conn->query("
         ) AS submission_count
 
     FROM quests q
+
     WHERE q.client_id = $client_id
+
     ORDER BY q.created_at DESC
 ");
 
+/* =========================
+   CATEGORIES
+========================= */
 $categories = $conn->query("
     SELECT *
     FROM categories
@@ -75,10 +138,18 @@ $categories = $conn->query("
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>Post Quest</title>
+
     <link rel="stylesheet" href="css/style.css">
+
 </head>
 
 <body>
@@ -87,25 +158,32 @@ $categories = $conn->query("
 
 <div class="form-container">
 
-    <!-- POST FORM -->
+    <!-- =========================
+         POST FORM
+    ========================== -->
     <div class="form-card profile-card">
 
         <h2>⚔️ Post a Side Quest</h2>
 
         <?php if (isset($success)) { ?>
+
             <div class="success-message">
                 <?php echo $success; ?>
             </div>
+
         <?php } ?>
 
         <?php if (isset($error)) { ?>
+
             <div class="error-message">
                 <?php echo $error; ?>
             </div>
+
         <?php } ?>
 
         <form method="POST">
 
+            <!-- TITLE -->
             <input
                 type="text"
                 name="title"
@@ -113,12 +191,14 @@ $categories = $conn->query("
                 required
             >
 
+            <!-- DESCRIPTION -->
             <textarea
                 name="description"
                 placeholder="Quest Description"
                 required
             ></textarea>
 
+            <!-- REWARD -->
             <input
                 type="number"
                 step="0.01"
@@ -128,6 +208,7 @@ $categories = $conn->query("
                 required
             >
 
+            <!-- DEADLINE -->
             <input
                 type="datetime-local"
                 name="deadline"
@@ -137,12 +218,16 @@ $categories = $conn->query("
             <!-- CATEGORY -->
             <select name="category_id" required>
 
-                <option value="">Select Category</option>
+                <option value="">
+                    Select Category
+                </option>
 
                 <?php while ($cat = $categories->fetch_assoc()): ?>
 
                     <option value="<?php echo $cat['category_id']; ?>">
+
                         <?php echo htmlspecialchars($cat['category_name']); ?>
+
                     </option>
 
                 <?php endwhile; ?>
@@ -152,15 +237,66 @@ $categories = $conn->query("
             <!-- DIFFICULTY -->
             <select name="difficulty" required>
 
-                <option value="">Select Difficulty</option>
-                <option value="easy">⚡ Easy</option>
-                <option value="medium">🔥 Medium</option>
-                <option value="hard">💀 Hard</option>
-                <option value="risky">☠️ Risky</option>
+                <option value="">
+                    Select Difficulty
+                </option>
+
+                <option value="easy">
+                    ⚡ Easy
+                </option>
+
+                <option value="medium">
+                    🔥 Medium
+                </option>
+
+                <option value="hard">
+                    💀 Hard
+                </option>
+
+                <option value="risky">
+                    ☠️ Risky
+                </option>
 
             </select>
 
-            <button type="submit" name="post_quest" class="btn">
+            <!-- QUEST TYPE -->
+            <select
+                name="is_party_quest"
+                id="questType"
+                required
+            >
+
+                <option value="0">
+                    ⚔️ Solo Quest
+                </option>
+
+                <option value="1">
+                    👥 Party Quest
+                </option>
+
+            </select>
+
+            <!-- PARTY OPTIONS -->
+            <div
+                id="partyOptions"
+                style="display:none;"
+            >
+
+                <input
+                    type="number"
+                    name="max_party_members"
+                    min="2"
+                    placeholder="Maximum Party Members"
+                >
+
+            </div>
+
+            <!-- SUBMIT -->
+            <button
+                type="submit"
+                name="post_quest"
+                class="btn"
+            >
                 Publish Quest
             </button>
 
@@ -168,7 +304,9 @@ $categories = $conn->query("
 
     </div>
 
-    <!-- QUEST LIST -->
+    <!-- =========================
+         QUEST LIST
+    ========================== -->
     <div class="quest-list">
 
         <h2 style="margin-bottom:1rem;">
@@ -196,28 +334,75 @@ $categories = $conn->query("
                         </div>
 
                         <div class="quest-info">
+
                             📌 Status:
+
                             <strong>
                                 <?php echo strtoupper($q['status']); ?>
                             </strong>
+
                         </div>
 
+                        <!-- QUEST TYPE -->
                         <div class="quest-info">
+
+                            <?php if ($q['is_party_quest'] == 1): ?>
+
+                                👥 Party Quest
+
+                            <?php else: ?>
+
+                                ⚔️ Solo Quest
+
+                            <?php endif; ?>
+
+                        </div>
+
+                        <!-- PARTY SIZE -->
+                        <?php if ($q['is_party_quest'] == 1): ?>
+
+                            <div class="quest-info">
+
+                                👥 Party Size:
+                                <?php echo $q['max_party_members']; ?>
+
+                            </div>
+
+                        <?php endif; ?>
+
+                        <div class="quest-info">
+
                             👥 Applicants:
                             <?php echo $q['applicant_count']; ?>
+
                         </div>
 
                         <div class="quest-info">
+
                             📦 Submissions:
                             <?php echo $q['submission_count']; ?>
+
                         </div>
 
                         <div class="quest-info">
+
                             📅 Deadline:
-                            <?php echo date('M d, Y h:i A', strtotime($q['deadline'])); ?>
+
+                            <?php echo date(
+                                'M d, Y h:i A',
+                                strtotime($q['deadline'])
+                            ); ?>
+
                         </div>
 
-                        <div style="margin-top:1rem; display:flex; gap:10px; flex-wrap:wrap;">
+                        <div
+                            style="
+                                margin-top:1rem;
+                                display:flex;
+                                gap:10px;
+                                flex-wrap:wrap;
+                            "
+                        >
 
                             <a
                                 href="submission-review.php?quest_id=<?php echo $q['quest_id']; ?>"
@@ -243,12 +428,19 @@ $categories = $conn->query("
 
         <?php else: ?>
 
-            <div class="quest-card" style="text-align:center;">
+            <div
+                class="quest-card"
+                style="text-align:center;"
+            >
 
-                <h2>No quests posted yet ⚔️</h2>
+                <h2>
+                    No quests posted yet ⚔️
+                </h2>
 
                 <p style="color:#aaa;">
+
                     Your posted quests will appear here.
+
                 </p>
 
             </div>
@@ -258,6 +450,37 @@ $categories = $conn->query("
     </div>
 
 </div>
+
+<!-- =========================
+     PARTY QUEST TOGGLE
+========================= -->
+<script>
+
+const questType = document.getElementById("questType");
+
+const partyOptions = document.getElementById("partyOptions");
+
+function togglePartyOptions() {
+
+    if (questType.value == "1") {
+
+        partyOptions.style.display = "block";
+
+    } else {
+
+        partyOptions.style.display = "none";
+
+    }
+}
+
+togglePartyOptions();
+
+questType.addEventListener(
+    "change",
+    togglePartyOptions
+);
+
+</script>
 
 <?php include 'includes/footer.php'; ?>
 
