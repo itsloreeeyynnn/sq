@@ -21,17 +21,23 @@ $notifs = $conn->query("SELECT * FROM notifications WHERE user_id = $user_id ORD
 
     <ul class="nav-links">
 
-        <li><a href="dashboard.php">Dashboard</a></li>
-        <?php if ($user_role === 'student'): ?>
-            <li><a href="quest-board.php">Quest Board</a></li>
-        <?php endif; ?>
-        <?php if ($user_role === 'client'): ?>
-            <li><a href="post-quest.php">Post Quest</a></li>
-        <?php endif; ?>
+        
+        <?php switch ($user_role) {
+            case 'student':
+                echo '<li><a href="student-dashboard.php">Dashboard</a></li>
+                        <li><a href="quest-board.php">Quest Board</a></li>';
+                break;
+
+            case 'client':
+                echo '<li><a href="client-dashboard.php">Dashboard</a></li>
+                        <li><a href="post-quest.php">Post Quest</a></li>';
+                break;
+        }
+        ?>
         <li><a href="messages.php">Messages</a></li>
         <li><a href="profile.php">👤 Profile</a></li>
 
-        
+
 
         <!-- Notification Bell -->
         <li class="notif-wrapper">
@@ -52,7 +58,8 @@ $notifs = $conn->query("SELECT * FROM notifications WHERE user_id = $user_id ORD
 
                 <?php if ($notifs->num_rows > 0): ?>
                     <?php while ($notif = $notifs->fetch_assoc()): ?>
-                        <a href="<?php echo $notif['link'] ?? '#'; ?>" class="notif-item <?php echo $notif['is_read'] == 0 ? 'notif-unread' : ''; ?>">
+                        <a href="<?php echo $notif['link'] ?? '#'; ?>"
+                            class="notif-item <?php echo $notif['is_read'] == 0 ? 'notif-unread' : ''; ?>">
                             <p><?php echo htmlspecialchars($notif['message']); ?></p>
                             <span><?php echo date('M d, g:i A', strtotime($notif['created_at'])); ?></span>
                         </a>
@@ -70,16 +77,16 @@ $notifs = $conn->query("SELECT * FROM notifications WHERE user_id = $user_id ORD
 </nav>
 
 <script>
-function toggleNotif() {
-    const dropdown = document.getElementById('notifDropdown');
-    dropdown.classList.toggle('notif-open');
-}
-
-// Close when clicking outside
-document.addEventListener('click', function(e) {
-    const wrapper = document.querySelector('.notif-wrapper');
-    if (!wrapper.contains(e.target)) {
-        document.getElementById('notifDropdown').classList.remove('notif-open');
+    function toggleNotif() {
+        const dropdown = document.getElementById('notifDropdown');
+        dropdown.classList.toggle('notif-open');
     }
-});
+
+    // Close when clicking outside
+    document.addEventListener('click', function (e) {
+        const wrapper = document.querySelector('.notif-wrapper');
+        if (!wrapper.contains(e.target)) {
+            document.getElementById('notifDropdown').classList.remove('notif-open');
+        }
+    });
 </script>

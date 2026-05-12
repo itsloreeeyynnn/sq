@@ -192,6 +192,10 @@
     /* =====================
     DASHBOARD
     ===================== */
+    .dashboard, .messages-container, .form-container {
+        margin: 4rem;
+    }
+
     .dashboard-cards {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -332,6 +336,12 @@
     /* =====================
     QUEST BOARD
     ===================== */
+    .pagination {
+        display: flex;
+        flex: 1;
+        justify-content: center;
+    }
+
     .quest-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
