@@ -4,9 +4,7 @@ include 'includes/db.php';
 
 $user_id = $_SESSION['user_id'];
 
-/* ---------------------------
-   TOTAL SPENT
----------------------------- */
+
 $total_spent = $conn->query("
     SELECT COALESCE(SUM(q.reward), 0) AS total
     FROM quests q
@@ -15,9 +13,7 @@ $total_spent = $conn->query("
     AND a.status = 'accepted'
 ")->fetch_assoc()['total'];
 
-/* ---------------------------
-   QUEST STATS
----------------------------- */
+
 $quest_stats = $conn->query("
     SELECT 
         COUNT(*) AS total_quests,
@@ -27,9 +23,7 @@ $quest_stats = $conn->query("
     WHERE client_id = $user_id
 ")->fetch_assoc();
 
-/* ---------------------------
-   SPENDING PER QUEST
----------------------------- */
+
 $breakdown = $conn->query("
     SELECT 
         q.quest_id,
@@ -45,9 +39,7 @@ $breakdown = $conn->query("
     ORDER BY q.created_at DESC
 ");
 
-/* ---------------------------
-   RECENT PAYMENTS (accepted work)
----------------------------- */
+
 $recent = $conn->query("
     SELECT 
         q.title,
@@ -80,7 +72,7 @@ $recent = $conn->query("
 
 <h1>📊 Analytics Dashboard</h1>
 
-<!-- TOP STATS -->
+
 <div class="analytics-grid">
 
     <div class="dashboard-card">
@@ -100,7 +92,7 @@ $recent = $conn->query("
 
 </div>
 
-<!-- BREAKDOWN -->
+
 <h2>📦 Spending Breakdown</h2>
 
 <table class="table">
@@ -134,7 +126,7 @@ $recent = $conn->query("
 
 </table>
 
-<!-- RECENT PAYMENTS -->
+
 <h2 style="margin-top:30px;">💸 Recent Payments</h2>
 
 <table class="table">

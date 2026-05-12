@@ -20,7 +20,6 @@ if (isset($_GET['action']) && isset($_GET['app_id'])) {
     $action = $_GET['action'];
     $app_id = (int)$_GET['app_id'];
 
-    // get application
     $app = $conn->query("
         SELECT * FROM applications 
         WHERE application_id = $app_id AND quest_id = $quest_id
@@ -30,21 +29,18 @@ if (isset($_GET['action']) && isset($_GET['app_id'])) {
 
         if ($action === 'accept') {
 
-            // accept applicant
             $conn->query("
                 UPDATE applications 
                 SET status = 'accepted'
                 WHERE application_id = $app_id
             ");
 
-            // mark quest as in progress
             $conn->query("
                 UPDATE quests 
                 SET status = 'in_progress'
                 WHERE quest_id = $quest_id
             ");
 
-            // notify student
             $conn->query("
                 INSERT INTO notifications (user_id, message, link)
                 VALUES (
@@ -63,7 +59,6 @@ if (isset($_GET['action']) && isset($_GET['app_id'])) {
                 WHERE application_id = $app_id
             ");
 
-            // notify student
             $conn->query("
                 INSERT INTO notifications (user_id, message)
                 VALUES (

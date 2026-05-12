@@ -5,9 +5,6 @@ include 'includes/db.php';
 $user_id = $_SESSION['user_id'];
 $quest_id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
-/* ---------------------------
-   GET QUEST + VERIFY ACCESS
----------------------------- */
 $quest_query = $conn->query("
     SELECT q.*, a.status AS application_status
     FROM quests q

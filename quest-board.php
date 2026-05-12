@@ -12,7 +12,7 @@ $max_reward = isset($_GET['max_reward']) && $_GET['max_reward'] !== '' ? (int) $
 $quest_type = isset($_GET['quest_type']) ? $_GET['quest_type'] : '';
 
 
-$limit = 9; // quests per page
+$limit = 9; 
 $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 $page = max(1, $page);
 $offset = ($page - 1) * $limit;
@@ -81,7 +81,6 @@ $count = $result->num_rows;
 
     <?php endif; ?>
 
-    <!-- Search & Filter Bar -->
     <div class="filter-wrapper">
         <div class="filter-search">
         <form method="GET" action="quest-board.php" style="margin-bottom:1rem; width: 100%;">
@@ -130,7 +129,6 @@ $count = $result->num_rows;
 
     </div>
 
-    <!-- Results count -->
     <div style="text-align:center; color:#aaa; margin-bottom:1rem;">
         <?php echo $count; ?> quest<?php echo $count !== 1 ? 's' : ''; ?> found
     </div>
@@ -164,7 +162,6 @@ $count = $result->num_rows;
             <?php while ($row = mysqli_fetch_assoc($result)): ?>
 
                 <?php
-                // Countdown calculation
                 $deadline_ts = strtotime($row['deadline']);
                 $now_ts = time();
                 $diff = $deadline_ts - $now_ts;

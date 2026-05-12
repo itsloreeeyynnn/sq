@@ -4,9 +4,7 @@ include 'includes/db.php';
 
 $user_id = $_SESSION['user_id'];
 
-/* ---------------------------
-   CHECK ROLE
----------------------------- */
+
 $user = $conn->query("
     SELECT role
     FROM users
@@ -19,9 +17,7 @@ if ($user['role'] !== 'student') {
     exit();
 }
 
-/* ---------------------------
-   GET QUEST ID
----------------------------- */
+
 $quest_id = isset($_POST['quest_id'])
     ? (int)$_POST['quest_id']
     : 0;
@@ -32,9 +28,7 @@ if ($quest_id <= 0) {
     exit();
 }
 
-/* ---------------------------
-   CHECK QUEST
----------------------------- */
+
 $quest_result = $conn->query("
     SELECT *
     FROM quests
@@ -48,9 +42,7 @@ if ($quest_result->num_rows === 0) {
     exit();
 }
 
-/* ---------------------------
-   PREVENT DUPLICATE APPLICATION
----------------------------- */
+
 $check = $conn->query("
     SELECT application_id
     FROM applications
@@ -64,9 +56,7 @@ if ($check->num_rows > 0) {
     exit();
 }
 
-/* ---------------------------
-   INSERT APPLICATION
----------------------------- */
+
 $conn->query("
     INSERT INTO applications
     (quest_id, student_id, status)
@@ -74,9 +64,7 @@ $conn->query("
     ($quest_id, $user_id, 'pending')
 ");
 
-/* ---------------------------
-   SEND NOTIFICATION
----------------------------- */
+
 $quest = $quest_result->fetch_assoc();
 
 $client_id = $quest['client_id'];
@@ -94,9 +82,7 @@ $link = "quest-applicants.php?id=$quest_id";
 $stmt->bind_param("iss", $client_id, $message, $link);
 $stmt->execute();
 
-/* ---------------------------
-   SUCCESS REDIRECT
----------------------------- */
+
 header("Location: quest-board.php?applied=success");
 exit();
 ?>

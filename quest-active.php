@@ -4,10 +4,6 @@ include 'includes/db.php';
 
 $user_id = $_SESSION['user_id'];
 
-/* ---------------------------
-   GET ACTIVE QUESTS
-   (accepted applications)
----------------------------- */
 $active_quests = $conn->query("
     SELECT q.*, a.status as application_status, a.applied_at
     FROM applications a

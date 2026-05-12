@@ -7,7 +7,7 @@ $user_id = $_SESSION['user_id'];
 $user_result = $conn->query("SELECT full_name, level FROM users WHERE user_id = $user_id");
 $user = $user_result->fetch_assoc();
 
-// Total quests posted by client
+
 $quests_result = $conn->query("
     SELECT COUNT(*) as total
     FROM quests
@@ -15,7 +15,7 @@ $quests_result = $conn->query("
 ");
 $total_quests = $quests_result->fetch_assoc()['total'];
 
-// Active (open) quests
+
 $active_result = $conn->query("
     SELECT COUNT(*) as total 
     FROM quests 
@@ -23,7 +23,7 @@ $active_result = $conn->query("
 ");
 $active_quests = $active_result->fetch_assoc()['total'];
 
-// Total applicants received
+
 $applicants_result = $conn->query("
     SELECT COUNT(*) as total
     FROM applications a
@@ -32,7 +32,7 @@ $applicants_result = $conn->query("
 ");
 $total_applicants = $applicants_result->fetch_assoc()['total'];
 
-// Accepted freelancers (completed hires)
+
 $accepted_result = $conn->query("
     SELECT COUNT(*) as total
     FROM applications a
@@ -41,7 +41,7 @@ $accepted_result = $conn->query("
 ");
 $accepted_hires = $accepted_result->fetch_assoc()['total'];
 
-// Total spent (reward sum of accepted quests)
+
 $spent_result = $conn->query("
     SELECT COALESCE(SUM(q.reward), 0) as total
     FROM quests q

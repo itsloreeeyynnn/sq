@@ -4,10 +4,9 @@ include 'includes/db.php';
 
 $user_id = $_SESSION['user_id'];
 
-// Get user level and XP
+
 $user = $conn->query("SELECT full_name, level, xp FROM users WHERE user_id = $user_id")->fetch_assoc();
 
-// Get badges earned
 $badges_result = $conn->query("
     SELECT b.badge_name, b.description, ub.earned_at 
     FROM user_badges ub 
@@ -16,7 +15,7 @@ $badges_result = $conn->query("
     ORDER BY ub.earned_at DESC
 ");
 
-// Guild rank tiers
+
 $ranks = [
     ['level' => 1, 'title' => 'Novice Adventurer', 'emoji' => '🌱', 'xp_needed' => 0],
     ['level' => 2, 'title' => 'Apprentice', 'emoji' => '⚔️', 'xp_needed' => 100],

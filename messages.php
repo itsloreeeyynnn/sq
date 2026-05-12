@@ -4,14 +4,16 @@ include 'includes/db.php';
 
 $current_user = $_SESSION['user_id'];
 
+<<<<<<< HEAD
 /* ---------------------------
    ACTIVE CHAT USER
 ---------------------------- */
 $chat_user = isset($_GET['user']) ? (int) $_GET['user'] : 0;
+=======
+$chat_user = isset($_GET['user']) ? (int)$_GET['user'] : 0;
+>>>>>>> d76399a865b491c266c2b555aaa38f94e96dcee7
 
-/* ---------------------------
-   SEND MESSAGE
----------------------------- */
+
 if (isset($_POST['send']) && $chat_user) {
 
     $message = mysqli_real_escape_string($conn, $_POST['message_text']);
@@ -25,6 +27,7 @@ if (isset($_POST['send']) && $chat_user) {
     exit();
 }
 
+<<<<<<< HEAD
 $search_user = isset($_GET['search_user'])
     ? mysqli_real_escape_string($conn, $_GET['search_user'])
     : '';
@@ -34,6 +37,8 @@ $search_sql = '';
 if (!empty($search_user)) {
     $search_sql = "AND u.full_name LIKE '%$search_user%'";
 }
+=======
+>>>>>>> d76399a865b491c266c2b555aaa38f94e96dcee7
 
 $conversations = $conn->query("
     SELECT 
@@ -63,9 +68,7 @@ $conversations = $conn->query("
     ORDER BY m.sent_at DESC
 ");
 
-/* ---------------------------
-   CHAT USER INFO
----------------------------- */
+
 $chat_user_info = null;
 
 if ($chat_user) {
@@ -94,9 +97,14 @@ if ($chat_user) {
 
         <div class="messages-layout">
 
+<<<<<<< HEAD
             <!-- LEFT: CONVERSATIONS -->
             <div class="convo-list">
                 <div style="margin-bottom:1rem;">
+=======
+   
+    <div class="convo-list">
+>>>>>>> d76399a865b491c266c2b555aaa38f94e96dcee7
 
                     <a href="new-message.php" class="btn" style="width:100%; display:block; text-align:center;">
                         ➕ New Message
@@ -164,10 +172,15 @@ if ($chat_user) {
 
     </div>
 
+<<<<<<< HEAD
     <?php if ($chat_user): ?>
         <script>
             const chatUser = <?php echo $chat_user; ?>;
             const currentUser = <?php echo $current_user; ?>;
+=======
+  
+    <div class="chat-box">
+>>>>>>> d76399a865b491c266c2b555aaa38f94e96dcee7
 
             function loadMessages() {
                 fetch("fetch-messages.php?user=" + chatUser)

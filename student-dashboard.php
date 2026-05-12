@@ -4,17 +4,14 @@ include 'includes/db.php';
 
 $user_id = $_SESSION['user_id'];
 
-// User XP and Level
 $user_result = $conn->query("SELECT full_name, level, xp FROM users WHERE user_id = $user_id");
 $user = $user_result->fetch_assoc();
 $current_xp = $user['xp'];
 $current_level = $user['level'];
 
-// XP needed per level (level * 100)
 $xp_needed = $current_level * 100;
 $xp_percent = $xp_needed > 0 ? min(100, round(($current_xp / $xp_needed) * 100)) : 0;
 
-// Guild rank title based on level
 $rank_titles = [
     1 => '🌱 Novice Adventurer',
     2 => '⚔️ Apprentice',
@@ -24,11 +21,9 @@ $rank_titles = [
 ];
 $rank_title = $rank_titles[$current_level] ?? '👑 Legendary';
 
-// Active Quests count
 $quest_result = $conn->query("SELECT COUNT(*) as total FROM quests WHERE client_id = $user_id OR quest_id IN (SELECT quest_id FROM applications WHERE student_id = $user_id AND status = 'accepted')");
 $active_quests = $quest_result->fetch_assoc()['total'];
 
-// Reputation traits
 $traits_result = $conn->query("SELECT rt.trait_name FROM user_traits ut JOIN reputation_traits rt ON ut.trait_id = rt.trait_id WHERE ut.user_id = $user_id");
 $traits = [];
 while ($row = $traits_result->fetch_assoc()) {
@@ -36,12 +31,10 @@ while ($row = $traits_result->fetch_assoc()) {
 }
 $traits_display = !empty($traits) ? implode(' • ', $traits) : 'No traits yet';
 
-// Guild Rank (based on badges count)
 $badge_result = $conn->query("SELECT COUNT(*) as total FROM user_badges WHERE user_id = $user_id");
 $badge_count = $badge_result->fetch_assoc()['total'];
 $guild_level = $badge_count + 1;
 
-// Total Earnings
 $earnings_result = $conn->query("SELECT COALESCE(SUM(q.reward), 0) as total FROM quests q JOIN applications a ON a.quest_id = q.quest_id WHERE a.student_id = $user_id AND a.status = 'accepted'");
 $total_earnings = $earnings_result->fetch_assoc()['total'];
 ?>
@@ -62,7 +55,6 @@ $total_earnings = $earnings_result->fetch_assoc()['total'];
     <h1>Welcome, <?php echo $_SESSION['full_name']; ?> ⚔️</h1>
     <p style="color:#aaa; margin-bottom:1.5rem;"><?php echo $rank_title; ?></p>
 
-    <!-- XP Progress Bar -->
     <div class="xp-container">
         <div class="xp-header">
             <span>⭐ Level <?php echo $current_level; ?></span>
