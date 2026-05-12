@@ -4,18 +4,12 @@ include 'includes/db.php';
 
 $user_id = $_SESSION['user_id'];
 
-/* ---------------------------
-   GET & VALIDATE QUEST ID
----------------------------- */
 $quest_id = isset($_GET['quest_id']) ? (int)$_GET['quest_id'] : 0;
 
 if ($quest_id <= 0) {
     die("No quest selected.");
 }
 
-/* ---------------------------
-   VERIFY OWNERSHIP
----------------------------- */
 $quest = $conn->query("
     SELECT * FROM quests 
     WHERE quest_id = $quest_id 
@@ -26,15 +20,11 @@ if (!$quest) {
     die("Unauthorized access or quest not found.");
 }
 
-/* ---------------------------
-   HANDLE ACTIONS
----------------------------- */
 if (isset($_GET['action']) && isset($_GET['submission_id'])) {
 
     $action = $_GET['action'];
     $submission_id = (int)$_GET['submission_id'];
 
-    // Get submission
     $submission = $conn->query("
         SELECT *
         FROM submissions
@@ -46,32 +36,25 @@ if (isset($_GET['action']) && isset($_GET['submission_id'])) {
 
         $student_id = $submission['student_id'];
 
-        // Prevent duplicate approval/rejection
         $remarks = strtolower($submission['remarks'] ?? '');
 
         $already_approved = strpos($remarks, 'approved') !== false;
         $already_rejected = strpos($remarks, 'rejected') !== false;
 
-        /* ---------------------------
-           APPROVE
-        ---------------------------- */
         if ($action === 'approve' && !$already_approved && !$already_rejected) {
 
-            // Update submission remarks
             $conn->query("
                 UPDATE submissions
                 SET remarks = 'APPROVED'
                 WHERE submission_id = $submission_id
             ");
 
-            // Complete quest
             $conn->query("
                 UPDATE quests
                 SET status = 'completed'
                 WHERE quest_id = $quest_id
             ");
 
-            // Get reward + student stats
             $data = $conn->query("
                 SELECT q.reward, u.xp, u.level
                 FROM quests q
@@ -83,19 +66,16 @@ if (isset($_GET['action']) && isset($_GET['submission_id'])) {
             $xp = (int)$data['xp'];
             $level = (int)$data['level'];
 
-            // XP reward
             $xp_gain = 50;
 
             $new_xp = $xp + $xp_gain;
             $new_level = $level;
 
-            // Level up system
             while ($new_xp >= ($new_level * 100)) {
                 $new_xp -= ($new_level * 100);
                 $new_level++;
             }
 
-            // Update student
             $conn->query("
                 UPDATE users
                 SET xp = $new_xp,
@@ -103,7 +83,6 @@ if (isset($_GET['action']) && isset($_GET['submission_id'])) {
                 WHERE user_id = $student_id
             ");
 
-            // Notification
             $message = "Your submission for '{$quest['title']}' was approved! +{$xp_gain} XP and ₱" . number_format($reward, 2) . " earned 🎉";
 
             $stmt = $conn->prepare("
@@ -117,9 +96,6 @@ if (isset($_GET['action']) && isset($_GET['submission_id'])) {
             $stmt->execute();
         }
 
-        /* ---------------------------
-           REJECT
-        ---------------------------- */
         if ($action === 'reject' && !$already_approved && !$already_rejected) {
 
             $conn->query("
@@ -128,7 +104,6 @@ if (isset($_GET['action']) && isset($_GET['submission_id'])) {
                 WHERE submission_id = $submission_id
             ");
 
-            // Notify student
             $message = "Your submission for '{$quest['title']}' was rejected. Please revise and submit again.";
 
             $stmt = $conn->prepare("
@@ -147,9 +122,6 @@ if (isset($_GET['action']) && isset($_GET['submission_id'])) {
     exit();
 }
 
-/* ---------------------------
-   GET SUBMISSIONS
----------------------------- */
 $submissions = $conn->query("
     SELECT s.*, u.full_name
     FROM submissions s

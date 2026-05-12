@@ -4,9 +4,6 @@ include 'includes/db.php';
 
 $user_id = $_SESSION['user_id'];
 
-/* ---------------------------
-   GET HIRED ADVENTURERS
----------------------------- */
 $hired = $conn->query("
     SELECT 
         a.application_id,

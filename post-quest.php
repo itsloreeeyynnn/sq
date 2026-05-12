@@ -87,7 +87,7 @@ $categories = $conn->query("
 
 <div class="form-container">
 
-    <!-- POST FORM -->
+    
     <div class="form-card profile-card">
 
         <h2>⚔️ Post a Side Quest</h2>
@@ -134,7 +134,7 @@ $categories = $conn->query("
                 required
             >
 
-            <!-- CATEGORY -->
+           
             <select name="category_id" required>
 
                 <option value="">Select Category</option>
@@ -149,7 +149,7 @@ $categories = $conn->query("
 
             </select>
 
-            <!-- DIFFICULTY -->
+           
             <select name="difficulty" required>
 
                 <option value="">Select Difficulty</option>
@@ -168,7 +168,7 @@ $categories = $conn->query("
 
     </div>
 
-    <!-- QUEST LIST -->
+    
     <div class="quest-list">
 
         <h2 style="margin-bottom:1rem;">

@@ -4,9 +4,6 @@ include 'includes/db.php';
 
 $user_id = $_SESSION['user_id'];
 
-/* ---------------------------
-   GET CLIENT QUESTS
----------------------------- */
 $quests = $conn->query("
     SELECT q.*,
         (SELECT COUNT(*) FROM applications a WHERE a.quest_id = q.quest_id) AS applicant_count,

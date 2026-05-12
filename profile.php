@@ -80,7 +80,7 @@ $classes = [
     4 => '📦 Runner'
 ];
 
-/* XP */
+
 $xp_needed = $user['level'] * 100;
 $xp_percent = $xp_needed > 0
     ? min(100, round(($user['xp'] / $xp_needed) * 100))
@@ -115,10 +115,10 @@ $xp_percent = $xp_needed > 0
 
 <div class="profile-grid">
 
-<!-- LEFT SIDE -->
+
 <div class="profile-left">
 
-    <!-- BASIC INFO -->
+   
     <div class="profile-card">
         <div class="profile-avatar">
             <?php echo strtoupper(substr($user['full_name'], 0, 1)); ?>
@@ -136,7 +136,7 @@ $xp_percent = $xp_needed > 0
         </p>
     </div>
 
-    <!-- STATS -->
+  
     <div class="profile-card">
         <h3>📊 Stats</h3>
 
@@ -171,7 +171,7 @@ $xp_percent = $xp_needed > 0
         </div>
     </div>
 
-    <!-- TRAITS -->
+    
     <div class="profile-card">
         <h3>⭐ Traits</h3>
 
@@ -184,7 +184,7 @@ $xp_percent = $xp_needed > 0
         </div>
     </div>
 
-    <!-- BADGES -->
+    
     <div class="profile-card">
         <h3>🎖️ Badges</h3>
 
@@ -199,7 +199,7 @@ $xp_percent = $xp_needed > 0
 
 </div>
 
-<!-- RIGHT SIDE (ONLY OWNER CAN EDIT) -->
+
 <?php if ($is_owner): ?>
 <div class="profile-right">
 

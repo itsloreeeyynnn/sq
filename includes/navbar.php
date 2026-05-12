@@ -2,14 +2,11 @@
 include_once 'includes/db.php';
 $user_id = $_SESSION['user_id'];
 
-// Get user role
 $user_role = $conn->query("SELECT role FROM users WHERE user_id = $user_id")->fetch_assoc()['role'];
 
-// Get unread notifications count
 $notif_result = $conn->query("SELECT COUNT(*) as total FROM notifications WHERE user_id = $user_id AND is_read = 0");
 $unread_count = $notif_result->fetch_assoc()['total'];
 
-// Get latest 5 notifications
 $notifs = $conn->query("SELECT * FROM notifications WHERE user_id = $user_id ORDER BY created_at DESC LIMIT 5");
 ?>
 
@@ -39,7 +36,7 @@ $notifs = $conn->query("SELECT * FROM notifications WHERE user_id = $user_id ORD
 
 
 
-        <!-- Notification Bell -->
+       
         <li class="notif-wrapper">
             <button class="notif-bell" onclick="toggleNotif()">
                 🔔
@@ -82,7 +79,7 @@ $notifs = $conn->query("SELECT * FROM notifications WHERE user_id = $user_id ORD
         dropdown.classList.toggle('notif-open');
     }
 
-    // Close when clicking outside
+    
     document.addEventListener('click', function (e) {
         const wrapper = document.querySelector('.notif-wrapper');
         if (!wrapper.contains(e.target)) {

@@ -4,14 +4,9 @@ include 'includes/db.php';
 
 $current_user = $_SESSION['user_id'];
 
-/* ---------------------------
-   ACTIVE CHAT USER
----------------------------- */
 $chat_user = isset($_GET['user']) ? (int)$_GET['user'] : 0;
 
-/* ---------------------------
-   SEND MESSAGE
----------------------------- */
+
 if (isset($_POST['send']) && $chat_user) {
 
     $message = mysqli_real_escape_string($conn, $_POST['message_text']);
@@ -25,9 +20,7 @@ if (isset($_POST['send']) && $chat_user) {
     exit();
 }
 
-/* ---------------------------
-   CONVERSATION LIST
----------------------------- */
+
 $conversations = $conn->query("
     SELECT 
         u.user_id,
@@ -49,9 +42,7 @@ $conversations = $conn->query("
     ORDER BY m.sent_at DESC
 ");
 
-/* ---------------------------
-   CHAT USER INFO
----------------------------- */
+
 $chat_user_info = null;
 
 if ($chat_user) {
@@ -78,7 +69,7 @@ if ($chat_user) {
 
 <div class="messages-layout">
 
-    <!-- LEFT: CONVERSATIONS -->
+   
     <div class="convo-list">
 
         <h3>💬 Conversations</h3>
@@ -99,7 +90,7 @@ if ($chat_user) {
 
     </div>
 
-    <!-- RIGHT: CHAT -->
+  
     <div class="chat-box">
 
         <?php if ($chat_user): ?>

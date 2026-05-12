@@ -5,9 +5,7 @@ include 'includes/db.php';
 
 $submission_id = (int)$_GET['id'];
 
-/* --------------------------
-   GET SUBMISSION + QUEST
---------------------------- */
+
 $query = "
 SELECT 
     s.student_id,
@@ -25,9 +23,7 @@ $student_id = $data['student_id'];
 $quest_id = $data['quest_id'];
 $difficulty = $data['difficulty'];
 
-/* --------------------------
-   XP REWARD
---------------------------- */
+
 $xp_rewards = [
     'easy' => 25,
     'medium' => 50,
@@ -37,9 +33,7 @@ $xp_rewards = [
 
 $xp_gain = $xp_rewards[$difficulty] ?? 25;
 
-/* --------------------------
-   GET CURRENT USER XP
---------------------------- */
+
 $user = $conn->query("
     SELECT xp, level
     FROM users
