@@ -549,6 +549,26 @@
     margin-top:1rem;
 }
 
+.search-msg {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+#user-card {
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#msg-btn {
+    width: 20%;
+}
+
 .open { background: #ff9800; }
 .completed { background: #4caf50; }
 

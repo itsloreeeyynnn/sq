@@ -314,7 +314,7 @@ $categories = $conn->query("
                 <?php while ($q = $quests->fetch_assoc()): ?>
 
                     <div class="quest-card">
-
+                    
                         <h2>
                             <?php echo htmlspecialchars($q['title']); ?>
                         </h2>

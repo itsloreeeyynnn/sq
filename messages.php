@@ -160,52 +160,51 @@ if ($chat_user) {
 
     </div>
 
+<?php if ($chat_user): ?>
+<script>
+const chatUser = <?php echo $chat_user; ?>;
+const currentUser = <?php echo $current_user; ?>;
 
-    <?php if ($chat_user): ?>
-        <script>
-            const chatUser = <?php echo $chat_user; ?>;
-            const currentUser = <?php echo $current_user; ?>;
+function loadMessages() {
 
-    <div class="chat-box">
+    fetch("fetch-messages.php?user=" + chatUser)
+        .then(res => res.json())
+        .then(data => {
 
+            const chat = document.getElementById("chatThread");
 
-            function loadMessages() {
-                fetch("fetch-messages.php?user=" + chatUser)
-                    .then(res => res.json())
-                    .then(data => {
+            chat.innerHTML = "";
 
-                        const chat = document.getElementById("chatThread");
-                        chat.innerHTML = "";
+            data.forEach(msg => {
 
-                        data.forEach(msg => {
+                const div = document.createElement("div");
 
-                            const div = document.createElement("div");
-                            div.classList.add("msg");
+                div.classList.add("msg");
 
-                            if (msg.sender_id == currentUser) {
-                                div.classList.add("me");
-                            }
+                if (msg.sender_id == currentUser) {
+                    div.classList.add("me");
+                }
 
-                            div.innerHTML = `
+                div.innerHTML = `
                     <p>${msg.message_text}</p>
+
                     <div style="font-size:10px; color:#aaa;">
                         ${msg.full_name} • ${msg.sent_at}
                     </div>
                 `;
 
-                            chat.appendChild(div);
-                        });
+                chat.appendChild(div);
+            });
 
-                        chat.scrollTop = chat.scrollHeight;
-                    });
-            }
+            chat.scrollTop = chat.scrollHeight;
+        });
+}
 
-            loadMessages();
+loadMessages();
 
-            setInterval(loadMessages, 2000);
-        </script>
-    <?php endif; ?>
-
+setInterval(loadMessages, 2000);
+</script>
+<?php endif; ?>
 </body>
 
 </html>

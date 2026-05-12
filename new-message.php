@@ -3,24 +3,6 @@ include 'includes/auth.php';
 include 'includes/db.php';
 
 $current_user = $_SESSION['user_id'];
-
-$search = isset($_GET['search'])
-    ? mysqli_real_escape_string($conn, $_GET['search'])
-    : '';
-
-$query = "
-    SELECT *
-    FROM users
-    WHERE user_id != $current_user
-";
-
-if (!empty($search)) {
-    $query .= " AND full_name LIKE '%$search%'";
-}
-
-$query .= " ORDER BY full_name ASC";
-
-$users = $conn->query($query);
 ?>
 
 <!DOCTYPE html>
@@ -36,43 +18,64 @@ $users = $conn->query($query);
 
 <div class="dashboard">
 
-    <h1>➕ New Message</h1>
+    <h2>➕ New Message</h2>
 
-    <form method="GET" style="margin-bottom:1.5rem;">
+    <input
+        type="text"
+        id="userSearch"
+        placeholder="Search users..."
+        class="filter-input"
+        autocomplete="off"
+    >
 
-        <input
-            type="text"
-            name="search"
-            placeholder="Search users..."
-            value="<?php echo htmlspecialchars($search); ?>"
-            class="filter-input"
-        >
+    <div
+        id="searchResults"
+        class="search-msg"
+        style="margin-top:1.5rem;"
+    >
 
-    </form>
-
-    <div class="quest-grid">
-
-        <?php while($u = $users->fetch_assoc()): ?>
-
-            <div class="quest-card">
-
-                <h3><?php echo htmlspecialchars($u['full_name']); ?></h3>
-
-                <p>
-                    <?php echo ucfirst($u['role']); ?>
-                </p>
-
-                <a href="messages.php?user=<?php echo $u['user_id']; ?>" class="btn">
-                    💬 Message
-                </a>
-
-            </div>
-
-        <?php endwhile; ?>
+        <p style="color:#aaa;">
+            Start typing to search users.
+        </p>
 
     </div>
 
 </div>
+
+<script>
+
+const searchInput = document.getElementById("userSearch");
+
+const resultsBox = document.getElementById("searchResults");
+
+searchInput.addEventListener("keyup", function () {
+
+    const query = this.value.trim();
+
+    if (query.length < 2) {
+
+        resultsBox.innerHTML = `
+            <p style="color:#aaa;">
+                Type at least 2 characters.
+            </p>
+        `;
+
+        return;
+    }
+
+    fetch("search-users.php?search=" + encodeURIComponent(query))
+
+        .then(res => res.text())
+
+        .then(data => {
+
+            resultsBox.innerHTML = data;
+
+        });
+
+});
+
+</script>
 
 </body>
 </html>
