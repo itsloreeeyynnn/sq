@@ -396,6 +396,15 @@
         padding: 11px;
     }
 
+    .quest-list {
+        flex: 2;
+        display: grid;
+        grid-template-columns: 100%;
+        gap: 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
     .drop-zone {
         border: 2px dashed #555;
         padding: 2rem;
@@ -412,9 +421,16 @@
         color: #fff;
     }
 
-    .form-card {
-        width: 400px;
+    .form-container {
+        display: flex;
+        gap: 1rem;
     }
+
+    .form-card {
+        flex: 1;
+        height: 550px;
+    }
+
     /* =====================
     BADGES
     ===================== */
@@ -494,6 +510,7 @@
     }
 
     .btn-clear {
+        width: 100%;
         padding: 10px 16px;
         border-radius: 10px;
         background: rgba(255,255,255,0.05);

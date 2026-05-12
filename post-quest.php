@@ -21,6 +21,18 @@ if (isset($_POST['post_quest'])) {
 
     $success = "Quest posted successfully!";
 }
+
+$client_id = $_SESSION['user_id'];
+
+$quests = $conn->query("
+    SELECT q.*,
+        (SELECT COUNT(*) FROM applications a WHERE a.quest_id = q.quest_id) AS applicant_count,
+        (SELECT COUNT(*) FROM submissions s WHERE s.quest_id = q.quest_id) AS submission_count
+    FROM quests q
+    WHERE q.client_id = $client_id
+    ORDER BY q.created_at DESC
+");
+
 ?>
 
 <!DOCTYPE html>
@@ -41,7 +53,7 @@ if (isset($_POST['post_quest'])) {
 
         <div class="form-card profile-card">
 
-            <h1>Post a Side Quest</h1>
+            <h2>Post a Side Quest</h2>
 
             <?php if (isset($success)) { ?>
                 <div class="success-message">
@@ -83,12 +95,48 @@ if (isset($_POST['post_quest'])) {
 
         </div>
 
-        <div class="stats-container">
+        <!-- QUEST LIST -->
+        <div class="quest-list">
+                <h2>Your Quests</h2>
+            <?php while ($q = $quests->fetch_assoc()): ?>
 
-            <div class="stats-card">
-                <h2>📋 Total Quests Posted</h2>
-                <p><?php echo $total_quests; ?></p>
-            </div>
+                <div class="quest-card">
+
+                    <h2><?php echo htmlspecialchars($q['title']); ?></h2>
+
+                    <p><?php echo htmlspecialchars($q['description']); ?></p>
+
+                    <div class="quest-info">
+                        💰 ₱<?php echo number_format($q['reward'], 2); ?>
+                    </div>
+
+                    <div class="quest-info">
+                        📌 Status: <strong><?php echo strtoupper($q['status']); ?></strong>
+                    </div>
+
+                    <div class="quest-info">
+                        👥 Applicants: <?php echo $q['applicant_count']; ?>
+                    </div>
+
+                    <div class="quest-info">
+                        📦 Submissions: <?php echo $q['submission_count']; ?>
+                    </div>
+
+                    <div style="margin-top:1rem; display:flex; gap:10px; flex-wrap:wrap;">
+
+                        <a href="submission-review.php?quest_id=<?php echo $q['quest_id']; ?>" class="btn">
+                            📦 Review Submissions
+                        </a>
+
+                        <a href="quest-applicants.php?id=<?php echo $q['quest_id']; ?>" class="btn-clear">
+                            👥 View Applicants
+                        </a>
+
+                    </div>
+
+                </div>
+
+            <?php endwhile; ?>
 
         </div>
 

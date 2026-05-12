@@ -4,9 +4,6 @@ include 'includes/db.php';
 
 $user_id = $_SESSION['user_id'];
 
-/* -----------------------
-   CHECK ROLE
------------------------- */
 $user = $conn->query("SELECT role FROM users WHERE user_id = $user_id")->fetch_assoc();
 
 if ($user['role'] !== 'student') {

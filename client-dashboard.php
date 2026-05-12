@@ -10,8 +10,8 @@ $user = $user_result->fetch_assoc();
 
 // Total quests posted by client
 $quests_result = $conn->query("
-    SELECT COUNT(*) as total 
-    FROM quests 
+    SELECT COUNT(*) as total
+    FROM quests
     WHERE client_id = $user_id
 ");
 $total_quests = $quests_result->fetch_assoc()['total'];
@@ -83,13 +83,8 @@ $total_spent = $spent_result->fetch_assoc()['total'];
             <p><?php echo $active_quests; ?></p>
         </a>
 
-        <a href="applications.php" class="dashboard-card">
-            <h2>📨 Applicants</h2>
-            <p><?php echo $total_applicants; ?></p>
-        </a>
-
         <a href="hired.php" class="dashboard-card">
-            <h2>🤝 Hired Freelancers</h2>
+            <h2>🤝 Hired adventurers</h2>
             <p><?php echo $accepted_hires; ?></p>
         </a>
 
