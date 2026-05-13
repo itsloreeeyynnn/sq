@@ -21,7 +21,12 @@ $rank_titles = [
 ];
 $rank_title = $rank_titles[$current_level] ?? '👑 Legendary';
 
-$quest_result = $conn->query("SELECT COUNT(*) as total FROM quests WHERE client_id = $user_id OR quest_id IN (SELECT quest_id FROM applications WHERE student_id = $user_id AND status = 'accepted')");
+$quest_result = $conn->query("
+    SELECT COUNT(*) as total
+    FROM applications
+    WHERE student_id = $user_id
+    AND status = 'accepted'
+");
 $active_quests = $quest_result->fetch_assoc()['total'];
 
 $traits_result = $conn->query("SELECT rt.trait_name FROM user_traits ut JOIN reputation_traits rt ON ut.trait_id = rt.trait_id WHERE ut.user_id = $user_id");
