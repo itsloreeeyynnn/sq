@@ -181,9 +181,35 @@
 
     
     .dashboard, .messages-container, .form-container {
-        margin: 4rem;
-        min-height: 60vh;
+        padding: 2rem;
     }
+
+    .messages-container {
+        min-height: 79vh;
+    }
+
+    .dashboard {
+        background-image: url('../assets/images/dashboard_bg.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        min-height: 80vh;
+        padding: 2rem;
+        position: relative;
+    }
+
+    .dashboard::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 0;
+}
+
+.dashboard > * {
+    position: relative;
+    z-index: 1;
+}
 
     .dashboard-cards {
         display: grid;
@@ -961,7 +987,6 @@
 
   
     .footer {
-        margin-top: 60px;
         text-align: center;
         padding: 24px;
         background: var(--bg-nav);

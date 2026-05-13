@@ -22,7 +22,6 @@ $user_id = $_SESSION['user_id'];
 <div class="page-title">
     <h1>Quest Board ⚔️</h1>
 </div>
-
 <!-- FILTER AREA -->
 <div class="filter-wrapper">
 
